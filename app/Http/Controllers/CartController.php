@@ -15,6 +15,7 @@ class CartController extends Controller
         // Tambahkan produk ke keranjang
         $cart = Session::get('cart', []);
         $cart[$id] = [
+            'id' => $id,
             'name' => $product->name,
             'price' => $product->price,
             'quantity' => 1,
@@ -29,4 +30,21 @@ class CartController extends Controller
         $cart = session('cart', []);
         return view('cart.view', compact('cart'));
     }
+
+    public function delete($id)
+{
+    // Ambil keranjang dari session
+    $cart = session('cart', []);
+
+    // Hapus item dari keranjang
+    if (isset($cart[$id])) {
+        unset($cart[$id]);
+    }
+
+    // Simpan kembali ke session
+    session(['cart' => $cart]);
+
+    return redirect()->back()->with('success', 'Produk berhasil dihapus dari keranjang!');
+}
+
 }

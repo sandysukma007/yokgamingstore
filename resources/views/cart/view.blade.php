@@ -18,10 +18,23 @@
                     <td>{{ $item['name'] }}</td>
                     <td>Rp {{ number_format($item['price'], 2) }}</td>
                     <td>{{ $item['quantity'] }}</td>
+                    <td>
+                        <form action="{{ route('cart.delete', $id) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                        </form>
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
+            
         </table>
+        <form action="{{ route('payment.create') }}" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-success">Bayar Sekarang</button>
+        </form>
+        
     @else
         <p>Keranjang Anda kosong.</p>
     @endif
