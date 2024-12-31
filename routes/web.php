@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentController;
-
+use App\Http\Controllers\AuthController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,3 +40,7 @@ Route::get('/payment/error', function () {
 // Transaction and Promo Routes
 Route::get('/transaction/{transactionId}', [PaymentController::class, 'getTransactionDetails']);
 Route::post('/promo/{promoId}/search', [PaymentController::class, 'searchPromo']);
+
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/verify', [AuthController::class, 'verifyEmail'])->name('verify.email');

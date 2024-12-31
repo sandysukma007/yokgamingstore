@@ -19,6 +19,10 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+
+            // Kolom tambahan untuk verifikasi email
+            $table->string('verification_code')->nullable();
+            $table->boolean('is_verified')->default(false);
         });
     }
 
