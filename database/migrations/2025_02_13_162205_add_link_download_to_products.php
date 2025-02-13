@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('customer', function (Blueprint $table) {
-            $table->timestamps(); // Menambahkan created_at & updated_at
+        Schema::table('products', function (Blueprint $table) {
+            $table->string('link_download')->nullable()->after('price');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('customer', function (Blueprint $table) {
-            $table->dropTimestamps();
+        Schema::table('products', function (Blueprint $table) {
+            //
         });
     }
 };

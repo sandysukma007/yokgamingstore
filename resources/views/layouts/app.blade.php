@@ -78,10 +78,13 @@
                     <!-- Keranjang -->
                     <li class="nav-item position-relative">
                         <a class="nav-link" href="{{ route('cart.view') }}">
-                            🛒 Keranjang
-                            <span class="cart-badge">{{ session('cart_count', 0) }}</span>
+                            🛒 
+                            <span class="cart-badge">
+                                {{ auth('customer')->check() ? \App\Models\Cart::where('customer_id', auth('customer')->id())->sum('quantity') : 0 }}
+                            </span>
                         </a>
                     </li>
+
 
                     <!-- User Authentication -->
                     @if (auth()->guard('customer')->check())

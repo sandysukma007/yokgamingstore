@@ -41,7 +41,7 @@ Route::get('/products/{id}', [ProductController::class, 'show'])->name('products
 
 
 // Rute yang harus login dulu
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth:customer'])->group(function () {
     // Cart Routes (Harus Login)
     Route::get('/cart/count', [CartController::class, 'cartItemCount']);
 
