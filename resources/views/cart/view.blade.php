@@ -2,6 +2,13 @@
 
 @section('content')
 <div class="container">
+
+    @if(!auth()->check())
+    <script>
+        window.location.href = "{{ route('login') }}";
+    </script>
+@endif
+
     <h1>Keranjang Belanja</h1>
     @if(session('cart') && count(session('cart')) > 0)
         <table class="table">

@@ -24,6 +24,10 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'User not found.']);
         }
 
+        if (Auth::attempt($credentials)) {
+            return redirect()->intended('/'); // Redirect ke home atau halaman yang sebelumnya dituju
+        }
+
         if (!$user->is_verified) {
             // Generate verification code
             $verificationCode = rand(100000, 999999);
@@ -107,4 +111,11 @@ class AuthController extends Controller
 
         return redirect('/login')->with('success', 'Email verified! You can now log in.');
     }
+
+    public function logout(Request $request)
+{
+    Auth::logout();
+    return redirect('/login'); // Redirect ke halaman login setelah logout
+}
+
 }

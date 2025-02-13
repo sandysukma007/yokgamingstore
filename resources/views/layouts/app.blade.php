@@ -24,6 +24,12 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('cart.view') }}">Keranjang</a> <!-- Tautan ke keranjang -->
                     </li>
+                    @if(auth()->check())
+                        <a href="{{ route('logout') }}">Logout</a>
+                    @else
+                        <a href="{{ route('login') }}">Login</a>
+                    @endif
+
                 </ul>
             </div>
         </div>
