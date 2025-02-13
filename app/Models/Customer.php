@@ -27,4 +27,11 @@ class Customer extends Authenticatable
     protected $hidden = [
         'password', 'verification_code'
     ];
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class, 'customer_id', 'user_id');
+    }
+    
+
 }

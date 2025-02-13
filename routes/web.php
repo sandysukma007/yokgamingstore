@@ -5,7 +5,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Mail;
 /*
 |--------------------------------------------------------------------------
@@ -60,6 +60,8 @@ Route::middleware(['auth:customer'])->group(function () {
     Route::get('/payment/error', function () {
         return view('payment.error');
     })->name('payment.error');
+
+    Route::get('/profile', [CustomerController::class, 'profile'])->name('customer.profile');
 });
 
 // Transaction and Promo Routes

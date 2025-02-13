@@ -94,7 +94,7 @@
                                 👤 {{ auth()->guard('customer')->user()->username }}
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">Profil</a></li>
+                                <li><a class="dropdown-item" href="{{ route('customer.profile') }}">Profil</a></li>
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
                                         @csrf
