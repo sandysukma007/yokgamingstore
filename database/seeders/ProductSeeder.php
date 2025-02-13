@@ -15,7 +15,7 @@ class ProductSeeder extends Seeder
         Product::create([
             'name' => 'Game PS5 - Example Game',
             'description' => 'Deskripsi untuk Game PS5.',
-            'price' => 500000,
+            'price' => 5000,
             'image_url' => 'https://example.com/image1.jpg',
             'category_id' => 1,
         ]);
@@ -23,7 +23,7 @@ class ProductSeeder extends Seeder
         Product::create([
             'name' => 'Game PC - Example Game',
             'description' => 'Deskripsi untuk Game PC.',
-            'price' => 300000,
+            'price' => 3000,
             'image_url' => 'https://example.com/image2.jpg',
             'category_id' => 2,
         ]);

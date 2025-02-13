@@ -5,6 +5,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AuthController;
+
+use Illuminate\Support\Facades\Mail;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -43,4 +45,19 @@ Route::post('/promo/{promoId}/search', [PaymentController::class, 'searchPromo']
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/verify', [AuthController::class, 'verifyEmail'])->name('verify.email');
+
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register.form');
+Route::post('/register', [AuthController::class, 'register'])->name('register');
+
+Route::get('/verify', [AuthController::class, 'showVerificationForm'])->name('verify.form');
+Route::post('/verify', [AuthController::class, 'verify'])->name('verify');
+
+Route::get('/test-email', function () {
+    $details = [
+        'title' => 'Test Email dari Laravel',
+        'body' => 'Ini adalah email uji coba menggunakan konfigurasi Gmail di Laravel.'
+    ];
+
+    Mail::to('sandysukma60@gmail.com')->send(new \App\Mail\TestMail($details));
+    return 'Email telah dikirim!';
+});
