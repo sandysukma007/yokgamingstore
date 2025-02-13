@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use App\Models\Customer;
 
 class AuthController extends Controller
 {
@@ -15,40 +16,77 @@ class AuthController extends Controller
         return view('login');
     }
 
+    // public function login(Request $request)
+    // {
+    //     $credentials = $request->only('email', 'password');
+    //     $user = User::where('email', $request->email)->first();
+
+    //     if (!$user) {
+    //         return back()->withErrors(['email' => 'User not found.']);
+    //     }
+
+    //     if (Auth::attempt($credentials)) {
+    //         return redirect()->intended('/'); // Redirect ke home atau halaman yang sebelumnya dituju
+    //     }
+
+    //     if (!$user->is_verified) {
+    //         // Generate verification code
+    //         $verificationCode = rand(100000, 999999);
+    //         $user->verification_code = $verificationCode;
+    //         $user->save();
+
+    //         // Send email
+    //         Mail::raw("Your verification code is: $verificationCode", function ($message) use ($user) {
+    //             $message->to($user->email)
+    //                     ->subject('Email Verification');
+    //         });
+
+    //         return back()->withErrors(['email' => 'Please verify your email. A verification code has been sent.']);
+    //     }
+
+    //     if (Auth::attempt($credentials)) {
+    //         return redirect()->intended('/');
+    //     }
+
+    //     return back()->withErrors(['password' => 'Invalid credentials.']);
+    // }
+
     public function login(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
-        $user = User::where('email', $request->email)->first();
+{
+    $credentials = $request->only('email', 'password');
+    $customer = Customer::where('email', $request->email)->first();
 
-        if (!$user) {
-            return back()->withErrors(['email' => 'User not found.']);
-        }
+    if (!$customer) {
+        return back()->withErrors(['email' => 'User not found.']);
+    }
 
-        if (Auth::attempt($credentials)) {
-            return redirect()->intended('/'); // Redirect ke home atau halaman yang sebelumnya dituju
-        }
-
-        if (!$user->is_verified) {
-            // Generate verification code
-            $verificationCode = rand(100000, 999999);
-            $user->verification_code = $verificationCode;
-            $user->save();
-
-            // Send email
-            Mail::raw("Your verification code is: $verificationCode", function ($message) use ($user) {
-                $message->to($user->email)
-                        ->subject('Email Verification');
-            });
-
-            return back()->withErrors(['email' => 'Please verify your email. A verification code has been sent.']);
-        }
-
-        if (Auth::attempt($credentials)) {
-            return redirect()->intended('/');
-        }
-
+    if (!Hash::check($request->password, $customer->password)) {
         return back()->withErrors(['password' => 'Invalid credentials.']);
     }
+
+    if (!$customer->is_verified) {
+        // Generate new verification code
+        $verificationCode = rand(100000, 999999);
+        $customer->verification_code = $verificationCode;
+        $customer->save();
+
+        // Kirim ulang email verifikasi
+        Mail::raw("Your verification code is: $verificationCode", function ($message) use ($customer) {
+            $message->to($customer->email)
+                    ->subject('Email Verification');
+        });
+
+        return back()->withErrors(['email' => 'Please verify your email. A verification code has been sent.']);
+
+        
+    }
+    Auth::guard('customer')->login($customer);
+    return redirect()->intended('/');
+    
+    // Auth::login($customer);
+    // return redirect()->intended('/');
+}
+
 
     public function showRegisterForm()
     {
@@ -56,33 +94,34 @@ class AuthController extends Controller
     }
 
     public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
+{
+    $request->validate([
+        'username' => 'required|string|max:50|unique:customer,username',
+        'email' => 'required|email|unique:customer,email',
+        'password' => 'required|string|min:6|confirmed',
+    ]);
 
-        // Generate verification code
-        $verificationCode = rand(100000, 999999);
+    // Generate verification code
+    $verificationCode = rand(100000, 999999);
 
-        // Simpan user dengan status belum terverifikasi
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'is_verified' => false,
-            'verification_code' => $verificationCode,
-        ]);
+    // Simpan user ke table `customer`
+    $user = Customer::create([
+        'username' => $request->username,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'verification_code' => $verificationCode,
+        'is_verified' => false,
+    ]);
 
-        // Kirim email verifikasi
-        Mail::raw("Your verification code is: $verificationCode", function ($message) use ($user) {
-            $message->to($user->email)
-                    ->subject('Email Verification');
-        });
+    // Kirim email verifikasi
+    Mail::raw("Your verification code is: $verificationCode", function ($message) use ($user) {
+        $message->to($user->email)
+                ->subject('Email Verification');
+    });
 
-        return redirect()->route('verify.form')->with('email', $user->email);
-    }
+    return redirect()->route('verify.form')->with('email', $user->email);
+}
+
 
     public function showVerificationForm()
     {
@@ -96,7 +135,7 @@ class AuthController extends Controller
             'verification_code' => 'required|numeric',
         ]);
 
-        $user = User::where('email', $request->email)
+        $user = Customer::where('email', $request->email)
                     ->where('verification_code', $request->verification_code)
                     ->first();
 
@@ -114,8 +153,24 @@ class AuthController extends Controller
 
     public function logout(Request $request)
 {
-    Auth::logout();
+    Auth::guard('customer')->logout();
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
     return redirect('/login'); // Redirect ke halaman login setelah logout
+}
+
+
+public function loginCustomer(Request $request)
+{
+    $credentials = $request->only('email', 'password');
+
+    if (Auth::guard('customer')->attempt($credentials)) {
+        return redirect()->intended('/');
+    }
+
+    return back()->withErrors(['email' => 'Invalid credentials.']);
 }
 
 }

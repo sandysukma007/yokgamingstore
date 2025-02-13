@@ -43,6 +43,8 @@ Route::get('/products/{id}', [ProductController::class, 'show'])->name('products
 // Rute yang harus login dulu
 Route::middleware('auth')->group(function () {
     // Cart Routes (Harus Login)
+    Route::get('/cart/count', [CartController::class, 'cartItemCount']);
+
     Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
     Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
     Route::delete('/cart/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');

@@ -21,9 +21,15 @@ class CartController extends Controller
             'quantity' => 1,
         ];
         Session::put('cart', $cart);
-
+        Session::put('cart_count', array_sum(array_column($cart, 'quantity')));
         return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke keranjang!');
     }
+
+    public function cartItemCount()
+{
+    return response()->json(['cart_count' => session('cart_count', 0)]);
+}
+
 
     public function view()
     {
@@ -43,7 +49,8 @@ class CartController extends Controller
 
     // Simpan kembali ke session
     session(['cart' => $cart]);
-
+    session()->put('cart_count', array_sum(array_column($cart, 'quantity')));
+    
     return redirect()->back()->with('success', 'Produk berhasil dihapus dari keranjang!');
 }
 
