@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Mail;
 */
 
 // Product Routes
-Route::get('/', [ProductController::class, 'index']);
+Route::get('/', [ProductController::class, 'index'])->name('home');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
 
 // // Cart Routes
@@ -47,13 +47,23 @@ Route::middleware(['auth:customer'])->group(function () {
 
     Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
     Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
+
     Route::delete('/cart/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
+
+    // Route::delete('/cart/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
 
     // Payment Routes (Harus Login)
     Route::post('/payment', [PaymentController::class, 'createPayment'])->name('payment.create');
+    // Route::get('/payment/success', function () {
+    //     return view('payment.success');
+    // })->name('payment.success');
+
+    Route::post('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
+
     Route::get('/payment/success', function () {
         return view('payment.success');
-    })->name('payment.success');
+    })->name('payment.success.page');
+    
     Route::get('/payment/pending', function () {
         return view('payment.pending');
     })->name('payment.pending');

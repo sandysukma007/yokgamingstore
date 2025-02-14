@@ -61,21 +61,26 @@ public function view()
 }
 
 
-    public function delete($id)
-{
-    // Ambil keranjang dari session
-    $cart = session('cart', []);
 
-    // Hapus item dari keranjang
-    if (isset($cart[$id])) {
-        unset($cart[$id]);
+public function delete($id)
+{
+    $customer = Auth::guard('customer')->user();
+
+    if (!$customer) {
+        return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
     }
 
-    // Simpan kembali ke session
-    session(['cart' => $cart]);
-    session()->put('cart_count', array_sum(array_column($cart, 'quantity')));
+    // Hapus item dari database berdasarkan customer_id & id keranjang
+    $deleted = Cart::where('id', $id)
+        ->where('customer_id', $customer->user_id)
+        ->delete();
 
-    return redirect()->back()->with('success', 'Produk berhasil dihapus dari keranjang!');
+    if ($deleted) {
+        return redirect()->back()->with('success', 'Produk berhasil dihapus dari keranjang!');
+    } else {
+        return redirect()->back()->with('error', 'Produk tidak ditemukan di keranjang!');
+    }
 }
+
 
 }

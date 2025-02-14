@@ -62,19 +62,6 @@
                         <a class="nav-link" href="/">Home</a>
                     </li>
 
-                    <!-- Dropdown Kategori -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="kategoriDropdown" role="button"
-                            data-bs-toggle="dropdown">
-                            Kategori
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Action</a></li>
-                            <li><a class="dropdown-item" href="#">RPG</a></li>
-                            <li><a class="dropdown-item" href="#">Sport</a></li>
-                        </ul>
-                    </li>
-
                     <!-- Keranjang -->
                     <li class="nav-item position-relative">
                         <a class="nav-link" href="{{ route('cart.view') }}">

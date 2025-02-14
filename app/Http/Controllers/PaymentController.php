@@ -9,6 +9,9 @@ use Midtrans\Snap;
 use Illuminate\Support\Facades\Log; // Add this line
 use Illuminate\Support\Facades\Auth;
 use App\Models\Cart;
+
+use App\Models\Purchase;
+
 class PaymentController extends Controller
 {
     // public function __construct()
@@ -84,63 +87,106 @@ class PaymentController extends Controller
 
 
     public function createPayment(Request $request)
-{
-    // Pastikan customer sudah login
-    if (!Auth::guard('customer')->check()) {
-        return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
-    }
+    {
+        // Pastikan customer sudah login
+        if (!Auth::guard('customer')->check()) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
 
-    // Ambil data customer yang sedang login
-    $customer = Auth::guard('customer')->user();
+        // Ambil data customer yang sedang login
+        $customer = Auth::guard('customer')->user();
 
-    // Ambil data keranjang dari database berdasarkan `user_id` customer yang sedang login
-    $cartItems = Cart::where('customer_id', $customer->user_id)->get();
+        // Ambil data keranjang dari database berdasarkan `user_id`
+        $cartItems = Cart::where('customer_id', $customer->user_id)->with('product')->get();
 
-    if ($cartItems->isEmpty()) {
-        return response()->json(['error' => 'Keranjang kosong'], 400);
-    }
+        if ($cartItems->isEmpty()) {
+            return response()->json(['error' => 'Keranjang kosong'], 400);
+        }
 
-    // Buat data item dan total jumlah
-    $items = [];
-    $grossAmount = 0;
+        // Buat data item dan total jumlah
+        $items = [];
+        $grossAmount = 0;
 
-    foreach ($cartItems as $item) {
-        $items[] = [
-            'id' => $item->product_id,
-            'price' => $item->product->price,
-            'quantity' => $item->quantity,
-            'name' => $item->product->name,
+        foreach ($cartItems as $item) {
+            $items[] = [
+                'id' => $item->product_id,
+                'price' => $item->product->price,
+                'quantity' => $item->quantity,
+                'name' => $item->product->name,
+            ];
+            $grossAmount += $item->product->price * $item->quantity;
+        }
+
+        // Buat transaksi
+        $transactionData = [
+            'transaction_details' => [
+                'order_id' => 'ORDER-' . uniqid(),
+                'gross_amount' => $grossAmount,
+            ],
+            'item_details' => $items,
+            'customer_details' => [
+                'first_name' => $customer->username,
+                'last_name' => '',
+                'email' => $customer->email,
+                'phone' => $customer->phone ?? '08123456789',
+            ],
         ];
-        $grossAmount += $item->product->price * $item->quantity;
+
+        // Logging untuk debugging
+        Log::info('Midtrans Transaction Data', $transactionData);
+
+        // Dapatkan Snap Token untuk pembayaran
+        try {
+            $snapToken = Snap::getSnapToken($transactionData);
+            return view('payment', [
+                'snapToken' => $snapToken,
+                'cartItems' => json_encode($items) // Kirim data keranjang ke view
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Midtrans Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Gagal membuat token pembayaran: ' . $e->getMessage()], 500);
+        }
     }
 
-    // Buat transaksi
-    $transactionData = [
-        'transaction_details' => [
-            'order_id' => 'ORDER-' . uniqid(),
-            'gross_amount' => $grossAmount,
-        ],
-        'item_details' => $items,
-        'customer_details' => [
-            'first_name' => $customer->username, // Menggunakan username sebagai nama pertama
-            'last_name' => '',
-            'email' => $customer->email,
-            'phone' => $customer->phone ?? '08123456789',
-        ],
-    ];
 
-    // Logging untuk debugging
-    Log::info('Midtrans Transaction Data', $transactionData);
 
-    // Dapatkan Snap Token untuk pembayaran
-    try {
-        $snapToken = Snap::getSnapToken($transactionData);
-        return view('payment', ['snapToken' => $snapToken]);
-    } catch (\Exception $e) {
-        Log::error('Midtrans Error: ' . $e->getMessage());
-        return response()->json(['error' => 'Gagal membuat token pembayaran: ' . $e->getMessage()], 500);
+    public function paymentSuccess(Request $request)
+    {
+        Log::info('Data transaksi diterima:', $request->all());
+
+        $user = Auth::guard('customer')->user();
+        if (!$user) {
+            return response()->json(['error' => 'User not authenticated'], 401);
+        }
+
+        $transaction = $request->all();
+
+        // Cek apakah item_details ada
+        if (!isset($transaction['item_details']) || !is_array($transaction['item_details'])) {
+            Log::error('item_details tidak ditemukan atau bukan array', ['data' => $transaction]);
+            return response()->json(['error' => 'Data item_details tidak ditemukan'], 400);
+        }
+
+        // Looping item untuk menyimpan ke database purchases
+        foreach ($transaction['item_details'] as $item) {
+            Purchase::create([
+                'customer_id' => $user->user_id,
+                'product_id' => $item['id'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+        
+        // Hapus semua item dari keranjang setelah pembayaran berhasil
+        Cart::where('customer_id', $user->user_id)->delete();
+
+        return response()->json(['success' => true, 'message' => 'Transaksi berhasil disimpan']);
     }
-}
+
+
+
+
+
 
 
     public function getTransactionDetails($transactionId)
