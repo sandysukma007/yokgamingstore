@@ -2,18 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+
 use Illuminate\Http\Request;
-use App\Models\Product; // Pastikan Anda mengimpor model Product
+
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request) // Pastikan ada Request $request di sini
     {
-        // Ambil semua produk dari database
-        $products = Product::all();
+        $query = Product::query();
 
-        // Kembalikan view dengan data produk
+        if ($request->has('search')) {
+            $query->where('name', 'LIKE', "%{$request->search}%");
+        }
+
+        $products = $query->paginate(10);
+
+        if ($request->ajax()) {
+            return view('products.list', compact('products'))->render();
+        }
+
         return view('products.index', compact('products'));
     }
+
 
     public function show($id)
     {
