@@ -18,7 +18,7 @@
         data-client-key="{{ config('midtrans.client_key') }}"></script>
     <script type="text/javascript">
         var snapToken = document.getElementById('snap-token').value;
-        var cartItems = {!! $cartItems !!}; // Ambil data dari Blade
+        var cartItems = {!! $cartItems !!}; 
 
         console.log("Data keranjang yang dikirim:", cartItems);
 
@@ -31,7 +31,7 @@
                     order_id: result.order_id,
                     gross_amount: result.gross_amount,
                     transaction_status: result.transaction_status,
-                    item_details: cartItems // Kirim item dari database
+                    item_details: cartItems 
                 };
 
                 fetch("{{ route('payment.success') }}", {
@@ -46,7 +46,7 @@
                     .then(data => {
                         console.log("Response dari server:", data);
                         if (data.success) {
-                            window.location.href = "/payment/success"; // Redirect ke halaman sukses
+                            window.location.href = "/payment/success"; 
                         }
                     })
                     .catch(error => console.error("Fetch error:", error));

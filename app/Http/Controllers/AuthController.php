@@ -16,40 +16,40 @@ class AuthController extends Controller
         return view('login');
     }
 
-    // public function login(Request $request)
-    // {
-    //     $credentials = $request->only('email', 'password');
-    //     $user = User::where('email', $request->email)->first();
+    
+    
+    
+    
 
-    //     if (!$user) {
-    //         return back()->withErrors(['email' => 'User not found.']);
-    //     }
+    
+    
+    
 
-    //     if (Auth::attempt($credentials)) {
-    //         return redirect()->intended('/'); // Redirect ke home atau halaman yang sebelumnya dituju
-    //     }
+    
+    
+    
 
-    //     if (!$user->is_verified) {
-    //         // Generate verification code
-    //         $verificationCode = rand(100000, 999999);
-    //         $user->verification_code = $verificationCode;
-    //         $user->save();
+    
+    
+    
+    
+    
 
-    //         // Send email
-    //         Mail::raw("Your verification code is: $verificationCode", function ($message) use ($user) {
-    //             $message->to($user->email)
-    //                     ->subject('Email Verification');
-    //         });
+    
+    
+    
+    
+    
 
-    //         return back()->withErrors(['email' => 'Please verify your email. A verification code has been sent.']);
-    //     }
+    
+    
 
-    //     if (Auth::attempt($credentials)) {
-    //         return redirect()->intended('/');
-    //     }
+    
+    
+    
 
-    //     return back()->withErrors(['password' => 'Invalid credentials.']);
-    // }
+    
+    
 
     public function login(Request $request)
 {
@@ -65,12 +65,12 @@ class AuthController extends Controller
     }
 
     if (!$customer->is_verified) {
-        // Generate new verification code
+        
         $verificationCode = rand(100000, 999999);
         $customer->verification_code = $verificationCode;
         $customer->save();
 
-        // Kirim ulang email verifikasi
+        
         Mail::raw("Your verification code is: $verificationCode", function ($message) use ($customer) {
             $message->to($customer->email)
                     ->subject('Email Verification');
@@ -83,8 +83,8 @@ class AuthController extends Controller
     Auth::guard('customer')->login($customer);
     return redirect()->intended('/');
     
-    // Auth::login($customer);
-    // return redirect()->intended('/');
+    
+    
 }
 
 
@@ -101,10 +101,10 @@ class AuthController extends Controller
         'password' => 'required|string|min:6|confirmed',
     ]);
 
-    // Generate verification code
+    
     $verificationCode = rand(100000, 999999);
 
-    // Simpan user ke table `customer`
+    
     $user = Customer::create([
         'username' => $request->username,
         'email' => $request->email,
@@ -113,7 +113,7 @@ class AuthController extends Controller
         'is_verified' => false,
     ]);
 
-    // Kirim email verifikasi
+    
     Mail::raw("Your verification code is: $verificationCode", function ($message) use ($user) {
         $message->to($user->email)
                 ->subject('Email Verification');
@@ -143,7 +143,7 @@ class AuthController extends Controller
             return back()->withErrors(['verification_code' => 'Invalid verification code.']);
         }
 
-        // Update user sebagai terverifikasi
+        
         $user->is_verified = true;
         $user->verification_code = null;
         $user->save();
@@ -158,7 +158,7 @@ class AuthController extends Controller
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect('/login'); // Redirect ke halaman login setelah logout
+    return redirect('/login'); 
 }
 
 

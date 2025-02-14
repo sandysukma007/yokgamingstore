@@ -7,63 +7,24 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Mail;
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
 
-// Product Routes
+
+
 Route::get('/', [ProductController::class, 'index'])->name('home');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
 
-// // Cart Routes
-// Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
-// Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
-// Route::delete('/cart/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
-
-// // Payment Routes
-// Route::post('/payment', [PaymentController::class, 'createPayment'])->name('payment.create');
-// Route::get('/payment/success', function () {
-//     return view('payment.success'); // Create a success.blade.php view
-// })->name('payment.success');
-// Route::get('/payment/pending', function () {
-//     return view('payment.pending'); // Create a pending.blade.php view
-// })->name('payment.pending');
-// Route::get('/payment/error', function () {
-//     return view('payment.error'); // Create an error.blade.php view
-// })->name('payment.error');
-
-
-// Rute yang harus login dulu
 Route::middleware(['auth:customer'])->group(function () {
-    // Cart Routes (Harus Login)
-    Route::get('/cart/count', [CartController::class, 'cartItemCount']);
 
+    Route::get('/cart/count', [CartController::class, 'cartItemCount']);
     Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
     Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
-
     Route::delete('/cart/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
-
-    // Route::delete('/cart/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
-
-    // Payment Routes (Harus Login)
     Route::post('/payment', [PaymentController::class, 'createPayment'])->name('payment.create');
-    // Route::get('/payment/success', function () {
-    //     return view('payment.success');
-    // })->name('payment.success');
-
     Route::post('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
-
     Route::get('/payment/success', function () {
         return view('payment.success');
     })->name('payment.success.page');
-    
+
     Route::get('/payment/pending', function () {
         return view('payment.pending');
     })->name('payment.pending');
@@ -74,7 +35,7 @@ Route::middleware(['auth:customer'])->group(function () {
     Route::get('/profile', [CustomerController::class, 'profile'])->name('customer.profile');
 });
 
-// Transaction and Promo Routes
+
 Route::get('/transaction/{transactionId}', [PaymentController::class, 'getTransactionDetails']);
 Route::post('/promo/{promoId}/search', [PaymentController::class, 'searchPromo']);
 
@@ -88,12 +49,3 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/verify', [AuthController::class, 'showVerificationForm'])->name('verify.form');
 Route::post('/verify', [AuthController::class, 'verify'])->name('verify');
 
-Route::get('/test-email', function () {
-    $details = [
-        'title' => 'Test Email dari Laravel',
-        'body' => 'Ini adalah email uji coba menggunakan konfigurasi Gmail di Laravel.'
-    ];
-
-    Mail::to('sandysukma60@gmail.com')->send(new \App\Mail\TestMail($details));
-    return 'Email telah dikirim!';
-});

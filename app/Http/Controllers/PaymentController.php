@@ -132,15 +132,15 @@ class PaymentController extends Controller
             ],
         ];
 
-        // Logging untuk debugging
+       
         Log::info('Midtrans Transaction Data', $transactionData);
 
-        // Dapatkan Snap Token untuk pembayaran
+        
         try {
             $snapToken = Snap::getSnapToken($transactionData);
             return view('payment', [
                 'snapToken' => $snapToken,
-                'cartItems' => json_encode($items) // Kirim data keranjang ke view
+                'cartItems' => json_encode($items) 
             ]);
         } catch (\Exception $e) {
             Log::error('Midtrans Error: ' . $e->getMessage());
@@ -161,13 +161,12 @@ class PaymentController extends Controller
 
         $transaction = $request->all();
 
-        // Cek apakah item_details ada
+    
         if (!isset($transaction['item_details']) || !is_array($transaction['item_details'])) {
             Log::error('item_details tidak ditemukan atau bukan array', ['data' => $transaction]);
             return response()->json(['error' => 'Data item_details tidak ditemukan'], 400);
         }
 
-        // Looping item untuk menyimpan ke database purchases
         foreach ($transaction['item_details'] as $item) {
             Purchase::create([
                 'customer_id' => $user->user_id,
@@ -177,7 +176,6 @@ class PaymentController extends Controller
             ]);
         }
         
-        // Hapus semua item dari keranjang setelah pembayaran berhasil
         Cart::where('customer_id', $user->user_id)->delete();
 
         return response()->json(['success' => true, 'message' => 'Transaksi berhasil disimpan']);

@@ -18,16 +18,16 @@ class CartController extends Controller
         $product = Product::findOrFail($id);
         $customer_id = Auth::guard('customer')->id();
     
-        // Cek apakah produk sudah ada di keranjang
+        
         $cartItem = Cart::where('customer_id', $customer_id)
                         ->where('product_id', $id)
                         ->first();
     
         if ($cartItem) {
-            // Jika sudah ada, tambah jumlahnya
+            
             $cartItem->increment('quantity');
         } else {
-            // Jika belum ada, tambahkan ke database
+            
             Cart::create([
                 'customer_id' => $customer_id,
                 'product_id' => $id,
@@ -52,9 +52,9 @@ public function view()
 
     $customer_id = Auth::guard('customer')->id();
     
-    // Ambil semua item dalam keranjang untuk customer yang sedang login
+    
     $cartItems = Cart::where('customer_id', $customer_id)
-                     ->with('product') // Pastikan ada relasi product
+                     ->with('product') 
                      ->get();
 
     return view('cart.view', compact('cartItems'));
@@ -70,7 +70,7 @@ public function delete($id)
         return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
     }
 
-    // Hapus item dari database berdasarkan customer_id & id keranjang
+    
     $deleted = Cart::where('id', $id)
         ->where('customer_id', $customer->user_id)
         ->delete();
