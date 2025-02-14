@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index(Request $request) // Pastikan ada Request $request di sini
+    public function index(Request $request)
     {
         $query = Product::query();
 
@@ -28,10 +28,8 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        // Ambil produk berdasarkan ID
         $product = Product::findOrFail($id);
 
-        // Kembalikan view dengan data produk
         return view('products.show', compact('product'));
     }
 }
